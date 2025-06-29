@@ -3,91 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <title>Invoice App</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
-  <h1>Invoice Management</h1>
-  <div class="tabs">
-    <button onclick="showTab('create')">Create Invoice</button>
-    <button onclick="showTab('history')">Invoice History</button>
-    <button onclick="showTab('update')">Update (Coming Soon)</button>
-  </div>
+<body class="bg-light">
 
-  <div id="create" class="tab">
-    <h2>Create Invoice</h2>
-    <form id="invoiceForm">
-      <label>Item:</label>
-      <select name="item_id">
-        {% for item in items %}
-          <option value="{{ item.id }}">{{ item.name }}</option>
-        {% endfor %}
-      </select>
+  <div class="container py-5">
+    <h1 class="text-center mb-4">Invoice Management</h1>
 
-      <label>Customer:</label>
-      <select name="customer_id">
-        {% for c in customers %}
-          <option value="{{ c.id }}">{{ c.name }}</option>
-        {% endfor %}
-      </select>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="invoiceTabs">
+      <li class="nav-item">
+        <button class="nav-link active" onclick="showTab('create')">Create Invoice</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" onclick="showTab('history')">Invoice History</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" onclick="showTab('update')">Update (Coming Soon)</button>
+      </li>
+    </ul>
 
-      <label>Quantity:</label>
-      <select name="quantity_id">
-        {% for q in quantities %}
-          <option value="{{ q.id }}">{{ q.value }}</option>
-        {% endfor %}
-      </select>
+    <!-- Create Invoice Tab -->
+    <div id="create" class="tab">
+      <h2>Create Invoice</h2>
+      <form id="invoiceForm" class="row g-3">
 
-      <label>Vehicle:</label>
-      <select name="vehicle_id">
-        {% for v in vehicles %}
-          <option value="{{ v.id }}">{{ v.number }}</option>
-        {% endfor %}
-      </select>
+        <div class="col-md-6">
+          <label class="form-label">Item:</label>
+          <select name="item_id" class="form-select">
+            {% for item in items %}
+              <option value="{{ item.id }}">{{ item.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-      <label>Destination:</label>
-      <input name="destination" required>
+        <div class="col-md-6">
+          <label class="form-label">Customer:</label>
+          <select name="customer_id" class="form-select">
+            {% for c in customers %}
+              <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-      <button type="submit">Submit</button>
-    </form>
-  </div>
+        <div class="col-md-6">
+          <label class="form-label">Quantity:</label>
+          <select name="quantity_id" class="form-select">
+            {% for q in quantities %}
+              <option value="{{ q.id }}">{{ q.value }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-  <div id="history" class="tab" style="display:none;">
-    <h2>Invoice History (Last 3 days)</h2>
-    <div id="historyList">Loading...</div>
-  </div>
-
-  <div id="update" class="tab" style="display:none;">
-    <p>Coming soon...</p>
-  </div>
-
-  <script>
-    function showTab(tab) {
-      document.querySelectorAll('.tab').forEach(el => el.style.display = 'none');
-      document.getElementById(tab).style.display = 'block';
-      if (tab === 'history') fetchHistory();
-    }
-
-    document.getElementById('invoiceForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
-      const res = await fetch('/create_invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
-      alert('Invoice Created!');
-      e.target.reset();
-    };
-
-    async function fetchHistory() {
-      const res = await fetch('/invoice_history');
-      const list = await res.json();
-      const el = document.getElementById('historyList');
-      el.innerHTML = list.map(i =>
-        `<div>Invoice #${i.id} | ${i.date} ${i.time} | ${i.item}, ${i.quantity}, ${i.customer}, ${i.vehicle} → ${i.destination}</div>`
-      ).join('');
-    }
-  </script>
-</body>
-</html>
+        <div class="col-md-6">
+          <label class="form-label">Vehicle:</label>
+          <select name="vehicle_id" class="form-select">
+            {% for v in vehicles %}
+              <option value="{{ v.id }}">{{ v.number }}</option>
+            {% endfor %}
+          </
