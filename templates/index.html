@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice App</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>Invoice Management</h1>
+  <div class="tabs">
+    <button onclick="showTab('create')">Create Invoice</button>
+    <button onclick="showTab('history')">Invoice History</button>
+    <button onclick="showTab('update')">Update (Coming Soon)</button>
+  </div>
+
+  <div id="create" class="tab">
+    <h2>Create Invoice</h2>
+    <form id="invoiceForm">
+      <label>Item:</label>
+      <select name="item_id">
+        {% for item in items %}
+          <option value="{{ item.id }}">{{ item.name }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Customer:</label>
+      <select name="customer_id">
+        {% for c in customers %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Quantity:</label>
+      <select name="quantity_id">
+        {% for q in quantities %}
+          <option value="{{ q.id }}">{{ q.value }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Vehicle:</label>
+      <select name="vehicle_id">
+        {% for v in vehicles %}
+          <option value="{{ v.id }}">{{ v.number }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Destination:</label>
+      <input name="destination" required>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <div id="history" class="tab" style="display:none;">
+    <h2>Invoice History (Last 3 days)</h2>
+    <div id="historyList">Loading...</div>
+  </div>
+
+  <div id="update" class="tab" style="display:none;">
+    <p>Coming soon...</p>
+  </div>
+
+  <script>
+    function showTab(tab) {
+      document.querySelectorAll('.tab').forEach(el => el.style.display = 'none');
+      document.getElementById(tab).style.display = 'block';
+      if (tab === 'history') fetchHistory();
+    }
+
+    document.getElementById('invoiceForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/create_invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      alert('Invoice Created!');
+      e.target.reset();
+    };
+
+    async function fetchHistory() {
+      const res = await fetch('/invoice_history');
+      const list = await res.json();
+      const el = document.getElementById('historyList');
+      el.innerHTML = list.map(i =>
+        `<div>Invoice #${i.id} | ${i.date} ${i.time} | ${i.item}, ${i.quantity}, ${i.customer}, ${i.vehicle} → ${i.destination}</div>`
+      ).join('');
+    }
+  </script>
+</body>
+</html>

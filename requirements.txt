@@ -1,0 +1,2 @@
+Flask==2.x
+gunicorn==21.x
