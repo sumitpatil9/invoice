@@ -8,58 +8,116 @@
 </head>
 <body class="bg-light">
 
-  <div class="container py-5">
-    <h1 class="text-center mb-4">Invoice Management</h1>
+<div class="container py-5">
+  <h1 class="text-center mb-4">Invoice Management</h1>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4" id="invoiceTabs">
-      <li class="nav-item">
-        <button class="nav-link active" onclick="showTab('create')">Create Invoice</button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" onclick="showTab('history')">Invoice History</button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" onclick="showTab('update')">Update (Coming Soon)</button>
-      </li>
-    </ul>
+  <!-- Tab Buttons -->
+  <div class="btn-group mb-4" role="group">
+    <button class="btn btn-primary" onclick="showTab('create')">Create Invoice</button>
+    <button class="btn btn-outline-primary" onclick="showTab('history')">Invoice History</button>
+    <button class="btn btn-outline-secondary" onclick="showTab('update')">Update (Coming Soon)</button>
+  </div>
 
-    <!-- Create Invoice Tab -->
-    <div id="create" class="tab">
-      <h2>Create Invoice</h2>
-      <form id="invoiceForm" class="row g-3">
+  <!-- Tab Content: Create Invoice -->
+  <div id="create" class="tab-content">
+    <h2>Create Invoice</h2>
+    <form id="invoiceForm" class="row g-3">
 
-        <div class="col-md-6">
-          <label class="form-label">Item:</label>
-          <select name="item_id" class="form-select">
-            {% for item in items %}
-              <option value="{{ item.id }}">{{ item.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <div class="col-md-6">
+        <label class="form-label">Item</label>
+        <select name="item_id" class="form-select">
+          {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Customer:</label>
-          <select name="customer_id" class="form-select">
-            {% for c in customers %}
-              <option value="{{ c.id }}">{{ c.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <div class="col-md-6">
+        <label class="form-label">Customer</label>
+        <select name="customer_id" class="form-select">
+          {% for c in customers %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Quantity:</label>
-          <select name="quantity_id" class="form-select">
-            {% for q in quantities %}
-              <option value="{{ q.id }}">{{ q.value }}</option>
-            {% endfor %}
-          </select>
-        </div>
+      <div class="col-md-6">
+        <label class="form-label">Quantity</label>
+        <select name="quantity_id" class="form-select">
+          {% for q in quantities %}
+            <option value="{{ q.id }}">{{ q.value }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Vehicle:</label>
-          <select name="vehicle_id" class="form-select">
-            {% for v in vehicles %}
-              <option value="{{ v.id }}">{{ v.number }}</option>
-            {% endfor %}
-          </
+      <div class="col-md-6">
+        <label class="form-label">Vehicle</label>
+        <select name="vehicle_id" class="form-select">
+          {% for v in vehicles %}
+            <option value="{{ v.id }}">{{ v.number }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Destination</label>
+        <input type="text" name="destination" class="form-control" required>
+      </div>
+
+      <div class="col-12">
+        <button type="submit" class="btn btn-success">Create Invoice</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tab Content: History -->
+  <div id="history" class="tab-content d-none">
+    <h2>Invoice History (Last 3 days)</h2>
+    <div id="historyList" class="mt-3">Loading...</div>
+  </div>
+
+  <!-- Tab Content: Update -->
+  <div id="update" class="tab-content d-none">
+    <h2>Update Masters</h2>
+    <p>Coming soon...</p>
+  </div>
+
+</div>
+
+<script>
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(div => div.classList.add('d-none'));
+    document.getElementById(tabId).classList.remove('d-none');
+  }
+
+  document.getElementById('invoiceForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    const res = await fetch('/create_invoice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    alert('Invoice Created!');
+    e.target.reset();
+  };
+
+  async function fetchHistory() {
+    const res = await fetch('/invoice_history');
+    const list = await res.json();
+    const el = document.getElementById('historyList');
+    el.innerHTML = list.map(i =>
+      `<div class="border p-2 mb-2 rounded bg-white shadow-sm">
+        <strong>Invoice #${i.id}</strong> | ${i.date} ${i.time}<br>
+        <em>${i.item}</em>, ${i.quantity}, ${i.customer}, ${i.vehicle} → <strong>${i.destination}</strong>
+      </div>`
+    ).join('');
+  }
+
+  // Load history when tab is shown
+  document.querySelector("[onclick=\"showTab('history')\"]").addEventListener('click', fetchHistory);
+</script>
+
+</body>
+</html>
